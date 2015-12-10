@@ -1,4 +1,9 @@
+from __future__ import division
 import copy
+import pdb
+from board import Board
+from ultimateBoard import UltimateBoard
+
 
 class MinimaxAgent:
 
@@ -18,11 +23,13 @@ class MinimaxAgent:
         return moves
     
     def score(self, board):
+        #pdb.set_trace()
         temp=[]
         for i in xrange(3):
             temp.append([])
             for j in xrange(3):
                 temp[i].append(self.scoreSmall(board.largeBoard[i][j]))
+        #print temp
         playerScore=0
         opponentsScore=0
         for i in xrange(3):
@@ -65,12 +72,14 @@ class MinimaxAgent:
             colSum=0
             for j in xrange(3):
                 rowSum+=numArr[i][j]
-                colSum+=numArr[i][j]
+                colSum+=numArr[j][i]
                 if numArr[i][j]>0:
                     trowsumP+=numArr[i][j]
-                    tcolsumP+=numArr[j][i]
                 elif numArr[i][j]<0:
                     trowsumO+=numArr[i][j]
+                if numArr[j][i]>0:
+                    tcolsumP+=numArr[j][i]
+                elif numArr[j][i]<0:
                     tcolsumO+=numArr[j][i]
             rowsumP+=trowsumP/3
             colsumP+=tcolsumP/3
@@ -79,12 +88,16 @@ class MinimaxAgent:
             #This is a hacked method, it shouldn't allow for a row or column where only the opponent has one but this works for now
             if rowSum==-1:
                 defP+=1
+                #print "def"+str(defP)
             elif rowSum==1:
                 defO+=1
+                #print "def"+str(defO)
             if colSum==-1:
                 defP+=1
+                #print "def"+str(defP)
             elif colSum==1:
                 defO+=1
+                #print "Def"+str(defP)
         attScoreP=self.No*(colsumP+rowsumP)/8
         attScoreO=self.No*(colsumO+rowsumO)/8
         defScoreP=self.Nd*(defP/4)
@@ -118,22 +131,20 @@ class MinimaxAgent:
 
     def analyze(self, board, currBoard, currDepth, player, otherPlayer):
         moveList=[]
-        print currDepth
         if currDepth<self.depth:
             temp1=currBoard[0]
             temp2=currBoard[1]
-            print temp1
-            print temp2
             if board.smallBoard.boardM[temp1][temp2]=='.':
-                print "Board is open checking moves"
+                #print "Board is open checking moves"
                 moveList=self.simulateMoves(board, currBoard)
             else:
-                print "Board is closed check other boards"
+                #print "Board is closed check other boards"
                 for i in xrange(3):
                     for j in xrange(3):
                         if board.smallBoard.boardM[i][j]=='.':
-                            moveList=moveList+simulateMoves(board, (i, j))
+                            moveList=moveList+self.simulateMoves(board, (i, j))
             scoreList=[]
+            #print moveList
             for move in moveList:
                 copyBoard=copy.deepcopy(board)
                 copyBoard.move(player, currBoard[0], currBoard[1], move[0], move[1])
@@ -141,6 +152,7 @@ class MinimaxAgent:
             best=-1
             minVal=100000000
             maxVal=-1
+            #print scoreList
             for i in xrange(len(scoreList)):
                 if scoreList[i][0]>maxVal:
                     best=i

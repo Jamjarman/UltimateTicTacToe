@@ -7,7 +7,7 @@ class Runner:
     
     def __init__(self):
         self.board=UltimateBoard()
-        self.agent=MinimaxAgent(.5, .5, 'y', 2)
+        self.agent=MinimaxAgent(.5, .5, 'y', 5)
         
     def printBoard(self):
         largeArr=self.board.largeBoard
@@ -53,6 +53,7 @@ class Runner:
                 self.board.move(currentPlayer, currentBoard[0], currentBoard[1], loc[0], loc[1])
                 x=loc[0]
                 y=loc[1]
+                self.printBoard()
             else:
                 self.printBoard()
                 print "It is "+currentPlayer+"'s turn"
