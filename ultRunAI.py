@@ -1,11 +1,13 @@
 from ultimateBoard import UltimateBoard
 from board import Board
+from minimaxagent import MinimaxAgent
 
 class Runner:
     'Runner for Tic Tac Toe game'
     
     def __init__(self):
         self.board=UltimateBoard()
+        self.agent=MinimaxAgent(.5, .5, 'y', 2)
         
     def printBoard(self):
         largeArr=self.board.largeBoard
@@ -45,16 +47,23 @@ class Runner:
         y=int(raw_input('Enter starting y location '))
         currentBoard=(x, y)
         while self.board.winner=="N":
-            self.printBoard()
-            print "It is "+currentPlayer+"'s turn"
-            print "You are playing in square ("+str(currentBoard[0])+", "+str(currentBoard[1])+")"
-            entered=False
-            while not entered:
-                x=int(raw_input('Enter x location '))
-                y=int(raw_input('Enter y location '))
-                entered=self.board.move(currentPlayer, currentBoard[0], currentBoard[1], x, y)
-                if entered==False:
-                    print "That space is already taken, please try again"
+            if currentPlayer=='y':
+                move=self.agent.analyze(self.board, currentBoard, 1, 'y', 'x')
+                loc=move
+                self.board.move(currentPlayer, currentBoard[0], currentBoard[1], loc[0], loc[1])
+                x=loc[0]
+                y=loc[1]
+            else:
+                self.printBoard()
+                print "It is "+currentPlayer+"'s turn"
+                print "You are playing in square ("+str(currentBoard[0])+", "+str(currentBoard[1])+")"
+                entered=False
+                while not entered:
+                    x=int(raw_input('Enter x location '))
+                    y=int(raw_input('Enter y location '))
+                    entered=self.board.move(currentPlayer, currentBoard[0], currentBoard[1], x, y)
+                    if entered==False:
+                        print "That space is already taken, please try again"
             winner=self.board.checkWinner()
             while self.board.smallBoard.boardM[x][y]!='.':
                 print "Board ("+str(x)+", "+str(y)+") has alreday been won"

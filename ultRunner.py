@@ -56,7 +56,6 @@ class Runner:
                 if entered==False:
                     print "That space is already taken, please try again"
             winner=self.board.checkWinner()
-            print self.board.smallBoard.boardM[x][y]
             while self.board.smallBoard.boardM[x][y]!='.':
                 print "Board ("+str(x)+", "+str(y)+") has alreday been won"
                 print "Player "+otherPlayer+" what square would you like to play in?"
