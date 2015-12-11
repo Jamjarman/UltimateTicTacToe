@@ -53,7 +53,6 @@ class Runner:
                 self.board.move(currentPlayer, currentBoard[0], currentBoard[1], loc[0], loc[1])
                 x=loc[0]
                 y=loc[1]
-                self.printBoard()
             else:
                 self.printBoard()
                 print "It is "+currentPlayer+"'s turn"
@@ -67,10 +66,17 @@ class Runner:
                         print "That space is already taken, please try again"
             winner=self.board.checkWinner()
             while self.board.smallBoard.boardM[x][y]!='.':
-                print "Board ("+str(x)+", "+str(y)+") has alreday been won"
-                print "Player "+otherPlayer+" what square would you like to play in?"
-                x=int(raw_input('Enter x location '))
-                y=int(raw_input('Enter y location '))
+                self.printBoard()
+                if currentPlayer=='y':
+                    print "Board ("+str(x)+", "+str(y)+") has alreday been won"
+                    print "Player "+otherPlayer+" what square would you like to play in?"
+                    x=int(raw_input('Enter x location '))
+                    y=int(raw_input('Enter y location '))
+                else:
+                    #Call the analyze function to pick the best board for y to play in
+                    loc=self.agent.analyze(self.board, currentBoard, 1, 'y', 'x')
+                    x=loc[0]
+                    y=loc[1]
             tempPlayer=currentPlayer
             currentPlayer=otherPlayer
             otherPlayer=tempPlayer

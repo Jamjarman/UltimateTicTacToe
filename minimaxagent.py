@@ -44,6 +44,12 @@ class MinimaxAgent:
                 oppScoreCR+=temp[j][i][1]
             playerScore+=playerScoreTR/3+playerScoreCR/3
             opponentsScore+=oppScoreTR/3+oppScoreCR/3
+        if board.checkWinner()==self.player:
+            playerScore=playerScore*3
+            opponentsScore=opponentsScore/3
+        elif board.checkWinner()!=self.player and board.checkWinner()!='.':
+            playerScore=playerScore/3
+            opponentsScore=opponentsScore/3
         return (playerScore, opponentsScore) 
                 
                 
@@ -131,24 +137,26 @@ class MinimaxAgent:
 
     def analyze(self, board, currBoard, currDepth, player, otherPlayer):
         moveList=[]
+        scoreList=[]
         if currDepth<self.depth:
             temp1=currBoard[0]
             temp2=currBoard[1]
             if board.smallBoard.boardM[temp1][temp2]=='.':
                 #print "Board is open checking moves"
                 moveList=self.simulateMoves(board, currBoard)
+                #print moveList
+                for move in moveList:
+                    copyBoard=copy.deepcopy(board)
+                    copyBoard.move(player, currBoard[0], currBoard[1], move[0], move[1])
+                    scoreList.append(self.analyze(copyBoard, move, currDepth+1, otherPlayer, player))
             else:
                 #print "Board is closed check other boards"
                 for i in xrange(3):
                     for j in xrange(3):
                         if board.smallBoard.boardM[i][j]=='.':
-                            moveList=moveList+self.simulateMoves(board, (i, j))
-            scoreList=[]
-            #print moveList
-            for move in moveList:
-                copyBoard=copy.deepcopy(board)
-                copyBoard.move(player, currBoard[0], currBoard[1], move[0], move[1])
-                scoreList.append(self.analyze(copyBoard, move, currDepth+1, otherPlayer, player))
+                            moveList.append((i, j))
+                for move in moveList:
+                    scoreList.append(self.analyze(board, move, currDepth, player, otherPlayer))
             best=-1
             minVal=100000000
             maxVal=-1
