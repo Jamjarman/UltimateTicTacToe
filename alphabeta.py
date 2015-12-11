@@ -115,7 +115,7 @@ class AlphaBetaAgent:
             elif depth%1==.5:
                 score=999999
                 player=self.opp
-            if board.checkWinner()=='.':
+            if board.smallBoard.boardM[currentBoard[0]][currentBoard[1]]=='.':
                 moves=self.simulateMoves(board, currentBoard)
                 modDepth=depth+.5
             else:
