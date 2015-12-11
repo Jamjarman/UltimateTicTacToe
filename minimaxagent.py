@@ -14,7 +14,7 @@ class MinimaxAgent:
         self.player=player
         self.depth=depth
         self.opp=opponent
-        self.output=open('output.txt', 'w')
+        self.pruneList=[]
         
     #get list of all possible legal moves in the give square, return as list of tuples
     def simulateMoves(self, board, currBoard):
@@ -89,10 +89,9 @@ class MinimaxAgent:
         return temp
     
 
-    def analyze(self, board, currBoard, currDepth, player, otherPlayer):
+    def analyze(self, board, currBoard, currDepth, player, otherPlayer, alpha, beta):
         moveList=[]
         scoreList=[]
-        self.output.write("Entering Analyze, depth: "+str(currDepth)+" player: "+player+" currBoard"+str(currBoard)+"\n")
         if currDepth<self.depth:
             temp1=currBoard[0]
             temp2=currBoard[1]
@@ -113,12 +112,7 @@ class MinimaxAgent:
                 for move in moveList:
                     scoreList.append(self.analyze(board, move, currDepth, player, otherPlayer))
             bestI=-1
-            bestVal=0
-            self.output.write("Evaluating score list: "+str(scoreList)+"\n")
-            if player==self.player:
-                bestVal=-1
-            elif player==self.opp:
-                bestVal=999999999                
+            bestVal=-1
             for i in xrange(len(scoreList)):
                 if player==self.player:
                     if scoreList[i][0]>bestVal:
@@ -129,13 +123,10 @@ class MinimaxAgent:
                         bestI=i
                         bestVal=scoreList[i][1]
             if currDepth==1:
-                self.output.write("Returning move "+str(moveList[bestI])+"\n")
                 return moveList[bestI]
             else:
-                self.output.write("Returning scorelist "+str(scoreList[bestI])+"\n")
                 return scoreList[bestI]
         else:
             scoreTuple=(self.score(board, self.player, self.opp), self.score(board, self.opp, self.player))
-            self.output.write("Returning score tuple from lowest level "+str(scoreTuple)+"\n")
             return scoreTuple
             
