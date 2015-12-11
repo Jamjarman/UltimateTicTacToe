@@ -7,7 +7,7 @@ class Runner:
     
     def __init__(self):
         self.board=UltimateBoard()
-        self.agent=MinimaxAgent(.5, .5, 'y', 4)
+        self.agent=MinimaxAgent(.5, .5, 'y', 'x', 4)
         
     def printBoard(self):
         largeArr=self.board.largeBoard

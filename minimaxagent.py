@@ -8,11 +8,12 @@ from ultimateBoard import UltimateBoard
 class MinimaxAgent:
 
     #Initialize agent with offensive and defensive modifiers, depth, and which player it is acting as
-    def __init__(self, off, deff, player, depth):
+    def __init__(self, off, deff, player, opponent, depth):
         self.No=off
         self.Nd=deff
         self.player=player
         self.depth=depth
+        self.opp=opponent
         self.output=open('output.txt', 'w')
         
     #get list of all possible legal moves in the give square, return as list of tuples
@@ -24,116 +25,62 @@ class MinimaxAgent:
                     moves.append((i, j))
         return moves
 
-    #get a score for the board
-    def score(self, board):
-        self.output.write("Getting score for board \n")
-        #pdb.set_trace()
-        temp=[]
-        #create a 3x3 array of scores of each of the small grids, each grid box contains a tuple of 
-        #(player score, opponent score)
+    #get a score for the board, add score for large board to scores for small boards
+    def score(self, board, player, opponent):
+        if board.smallBoard.checkWinner()==player:
+            return 121
+        elif board.smallBoard.checkWinner()==opponent:
+            return 0
+        score=0
+        score+=self.scoreSquare(board.smallBoard, player, opponent)
         for i in xrange(3):
-            temp.append([])
             for j in xrange(3):
-                #call scoreSmall to score the individual board and append it to the array
-                temp[i].append(self.scoreSmall(board.largeBoard[i][j]))
-        self.output.write("Score table: "+str(temp)+"\n")
-        #print temp
-        playerScore=0
-        opponentsScore=0
-        #iterate through array and calculate overall score for array
-        for i in xrange(3):
-            playerScoreTR=0
-            playerScoreCR=0
-            oppScoreTR=0
-            oppScoreCR=0
-            for j in xrange(3):
-                playerScoreTR+=temp[i][j][0]
-                playerScoreCR+=temp[j][i][0]
-                oppScoreTR+=temp[i][j][1]
-                oppScoreCR+=temp[j][i][1]
-            playerScore+=playerScoreTR/3+playerScoreCR/3
-            opponentsScore+=oppScoreTR/3+oppScoreCR/3
-        self.output.write("Player score: "+str(playerScore)+" Opponent Score: "+str(opponentsScore)+"\n")
-        if board.checkWinner()==self.player:
-            self.output.write("Player will win\n")
-            playerScore=playerScore*3
-            opponentsScore=opponentsScore/3
-        elif board.checkWinner()!=self.player and board.checkWinner()!='.' and board.checkWinner()!='N':
-            self.output.write("Opponent will win"+board.checkWinner()+"\n")
-            playerScore=playerScore/3
-            opponentsScore=opponentsScore*3
-        return (playerScore, opponentsScore) 
-                
-                
-    def scoreSmall(self, board):
+                score+=self.scoreSquare(board.largeBoard[i][j], player, opponent)
+        return score
+    
+    #Currently implemented to ignore opponent's pieces except for defense calc and to check if opponent has won square
+    def scoreSquare(self, board, player, opponent):
+        if board.checkWinner()==player:
+            return 12
+        elif board.checkWinner()==opponent:
+            return 0
         arr=board.boardM
-        if board.checkWinner()==self.player:
-            return (1, 0)
-        elif board.checkWinner()!=self.player and board.checkWinner()!='.':
-            return (0, 1)
-        self.output.write("Evaluating mini board: "+str(arr)+"\n")
-        rowsumP=0
-        colsumP=0
-        disumP=0
-        rowsumO=0
-        colsumO=0
-        disumO=0
-        defP=0
-        defO=0
-        #todo, include analysis of diagonals
-        numArr=self.makeNum(arr)
+        numArr=self.makeNum(arr, player)
+        rowpoints=0
+        colpoints=0
+        defpoints=0
+        tempRow=0
+        tempCol=0
+        rowScore=0
+        colScore=0
+        rowAbs=0
+        colAbs=0
         for i in xrange(3):
-            trowsumP=0
-            tcolsumP=0
-            trowsumO=0
-            tcolsumO=0
-            rowSum=0
-            colSum=0
-            rowSumAct=0
-            colSumAct=0
             for j in xrange(3):
-                rowSum+=numArr[i][j]
-                colSum+=numArr[j][i]
-                rowSumAct+=abs(numArr[i][j])
-                colSumAct+=abs(numArr[j][i])
                 if numArr[i][j]>0:
-                    trowsumP+=numArr[i][j]
-                elif numArr[i][j]<0:
-                    trowsumO+=numArr[i][j]
+                    tempRow+=1
                 if numArr[j][i]>0:
-                    tcolsumP+=numArr[j][i]
-                elif numArr[j][i]<0:
-                    tcolsumO+=numArr[j][i]
-            rowsumP+=trowsumP/3
-            colsumP+=tcolsumP/3
-            rowsumO+=trowsumO/-3
-            colsumO+=tcolsumO/-3
-            if rowSum==-1 and rowSumAct==3:
-                defP+=1
-            elif rowSum==1 and rowSumAct==3:
-                defO+=1
-            if colSum==-1 and colSumAct==3:
-                defP+=1
-            elif colSum==1 and colSumAct==3:
-                defO+=1
-        attScoreP=self.No*(colsumP+rowsumP)/8
-        attScoreO=self.No*(colsumO+rowsumO)/8
-        defScoreP=self.Nd*(defP/4)
-        defScoreO=self.Nd*(defO/4)
-        scoreP=attScoreP+defScoreP
-        scoreO=attScoreO+defScoreO
-        self.output.write("Final score for board"+str((scoreP, scoreO))+"\n")
-        return (scoreP, scoreO)
-        
-        
+                    tempCol+=1
+                rowAbs+=abs(numArr[i][j])
+                colAbs+=abs(numArr[j][i])
+                rowScore+=numArr[i][j]
+                colScore+=numArr[j][i]
+            rowpoints+=tempRow/3
+            colpoints+=tempCol/3
+            if rowAbs==3 and rowScore==-1:
+                defpoints+=1
+            if colAbs==3 and colScore==-1:
+                defpoints+=1
+        score=rowpoints+colpoints+defpoints
+        return score
+                        
                 
-                
-    def makeNum(self, arr):
+    def makeNum(self, arr, plyr):
         temp=[]
         for i in xrange(3):
             temp.append([])
             for j in xrange(3):
-                if arr[i][j]==self.player:
+                if arr[i][j]==plyr:
                     temp[i].append(1)
                 elif arr[i][j]!='.':
                     temp[i].append(-1)
@@ -170,14 +117,14 @@ class MinimaxAgent:
             self.output.write("Evaluating score list: "+str(scoreList)+"\n")
             if player==self.player:
                 bestVal=-1
-            else:
+            elif player==self.opp:
                 bestVal=999999999                
             for i in xrange(len(scoreList)):
                 if player==self.player:
                     if scoreList[i][0]>bestVal:
                         bestI=i
                         bestVal=scoreList[i][0]
-                else:
+                elif player==self.opp:
                     if scoreList[i][1]<bestVal:
                         bestI=i
                         bestVal=scoreList[i][1]
@@ -188,7 +135,7 @@ class MinimaxAgent:
                 self.output.write("Returning scorelist "+str(scoreList[bestI])+"\n")
                 return scoreList[bestI]
         else:
-            scoreTuple=self.score(board)
+            scoreTuple=(self.score(board, self.player, self.opp), self.score(board, self.opp, self.player))
             self.output.write("Returning score tuple from lowest level "+str(scoreTuple)+"\n")
             return scoreTuple
             
