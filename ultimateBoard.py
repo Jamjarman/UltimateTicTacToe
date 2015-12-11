@@ -52,5 +52,6 @@ class UltimateBoard:
             if tempPlayer==self.smallBoard.boardM[1][1] and tempPlayer==self.smallBoard.boardM[2][0]:
                 self.winner=tempPlayer
                 return self.winner
+        return '.'
                 
             

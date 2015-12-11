@@ -7,13 +7,15 @@ from ultimateBoard import UltimateBoard
 
 class MinimaxAgent:
 
+    #Initialize agent with offensive and defensive modifiers, depth, and which player it is acting as
     def __init__(self, off, deff, player, depth):
         self.No=off
         self.Nd=deff
         self.player=player
         self.depth=depth
+        self.output=open('output.txt', 'w')
         
-
+    #get list of all possible legal moves in the give square, return as list of tuples
     def simulateMoves(self, board, currBoard):
         moves=[]
         for i in xrange(3):
@@ -21,17 +23,24 @@ class MinimaxAgent:
                 if board.largeBoard[currBoard[0]][currBoard[1]].boardM[i][j]=='.':
                     moves.append((i, j))
         return moves
-    
+
+    #get a score for the board
     def score(self, board):
+        self.output.write("Getting score for board \n")
         #pdb.set_trace()
         temp=[]
+        #create a 3x3 array of scores of each of the small grids, each grid box contains a tuple of 
+        #(player score, opponent score)
         for i in xrange(3):
             temp.append([])
             for j in xrange(3):
+                #call scoreSmall to score the individual board and append it to the array
                 temp[i].append(self.scoreSmall(board.largeBoard[i][j]))
+        self.output.write("Score table: "+str(temp)+"\n")
         #print temp
         playerScore=0
         opponentsScore=0
+        #iterate through array and calculate overall score for array
         for i in xrange(3):
             playerScoreTR=0
             playerScoreCR=0
@@ -44,12 +53,15 @@ class MinimaxAgent:
                 oppScoreCR+=temp[j][i][1]
             playerScore+=playerScoreTR/3+playerScoreCR/3
             opponentsScore+=oppScoreTR/3+oppScoreCR/3
+        self.output.write("Player score: "+str(playerScore)+" Opponent Score: "+str(opponentsScore)+"\n")
         if board.checkWinner()==self.player:
+            self.output.write("Player will win\n")
             playerScore=playerScore*3
             opponentsScore=opponentsScore/3
-        elif board.checkWinner()!=self.player and board.checkWinner()!='.':
+        elif board.checkWinner()!=self.player and board.checkWinner()!='.' and board.checkWinner()!='N':
+            self.output.write("Opponent will win"+board.checkWinner()+"\n")
             playerScore=playerScore/3
-            opponentsScore=opponentsScore/3
+            opponentsScore=opponentsScore*3
         return (playerScore, opponentsScore) 
                 
                 
@@ -59,6 +71,7 @@ class MinimaxAgent:
             return (1, 0)
         elif board.checkWinner()!=self.player and board.checkWinner()!='.':
             return (0, 1)
+        self.output.write("Evaluating mini board: "+str(arr)+"\n")
         rowsumP=0
         colsumP=0
         disumP=0
@@ -76,9 +89,13 @@ class MinimaxAgent:
             tcolsumO=0
             rowSum=0
             colSum=0
+            rowSumAct=0
+            colSumAct=0
             for j in xrange(3):
                 rowSum+=numArr[i][j]
                 colSum+=numArr[j][i]
+                rowSumAct+=abs(numArr[i][j])
+                colSumAct+=abs(numArr[j][i])
                 if numArr[i][j]>0:
                     trowsumP+=numArr[i][j]
                 elif numArr[i][j]<0:
@@ -91,32 +108,22 @@ class MinimaxAgent:
             colsumP+=tcolsumP/3
             rowsumO+=trowsumO/-3
             colsumO+=tcolsumO/-3
-            #This is a hacked method, it shouldn't allow for a row or column where only the opponent has one but this works for now
-            if rowSum==-1:
+            if rowSum==-1 and rowSumAct==3:
                 defP+=1
-                #print "def"+str(defP)
-            elif rowSum==1:
+            elif rowSum==1 and rowSumAct==3:
                 defO+=1
-                #print "def"+str(defO)
-            if colSum==-1:
+            if colSum==-1 and colSumAct==3:
                 defP+=1
-                #print "def"+str(defP)
-            elif colSum==1:
+            elif colSum==1 and colSumAct==3:
                 defO+=1
-                #print "Def"+str(defP)
         attScoreP=self.No*(colsumP+rowsumP)/8
         attScoreO=self.No*(colsumO+rowsumO)/8
         defScoreP=self.Nd*(defP/4)
         defScoreO=self.Nd*(defO/4)
         scoreP=attScoreP+defScoreP
         scoreO=attScoreO+defScoreO
-        if scoreO+scoreP>0:
-            finScoreO=scoreO/(scoreO+scoreP)
-            finScoreP=scoreP/(scoreO+scoreP)
-        else:
-            finScoreO=0
-            finScoreP=0
-        return (finScoreP, finScoreO)
+        self.output.write("Final score for board"+str((scoreP, scoreO))+"\n")
+        return (scoreP, scoreO)
         
         
                 
@@ -138,6 +145,7 @@ class MinimaxAgent:
     def analyze(self, board, currBoard, currDepth, player, otherPlayer):
         moveList=[]
         scoreList=[]
+        self.output.write("Entering Analyze, depth: "+str(currDepth)+" player: "+player+" currBoard"+str(currBoard)+"\n")
         if currDepth<self.depth:
             temp1=currBoard[0]
             temp2=currBoard[1]
@@ -157,24 +165,30 @@ class MinimaxAgent:
                             moveList.append((i, j))
                 for move in moveList:
                     scoreList.append(self.analyze(board, move, currDepth, player, otherPlayer))
-            best=-1
-            minVal=100000000
-            maxVal=-1
-            #print scoreList
-            for i in xrange(len(scoreList)):
-                if scoreList[i][0]>maxVal:
-                    best=i
-                    maxVal=scoreList[i][0]
-                    minVal=scoreList[i][1]
-                elif scoreList[i][0]==maxVal and scoreList[i][1]<minVal:
-                    best=i
-                    maxVal=scoreList[i][0]
-                    minVal=scoreList[i][1]
-            if currDepth==1:
-                return moveList[best]
+            bestI=-1
+            bestVal=0
+            self.output.write("Evaluating score list: "+str(scoreList)+"\n")
+            if player==self.player:
+                bestVal=-1
             else:
-                return scoreList[best]
+                bestVal=999999999                
+            for i in xrange(len(scoreList)):
+                if player==self.player:
+                    if scoreList[i][0]>bestVal:
+                        bestI=i
+                        bestVal=scoreList[i][0]
+                else:
+                    if scoreList[i][1]<bestVal:
+                        bestI=i
+                        bestVal=scoreList[i][1]
+            if currDepth==1:
+                self.output.write("Returning move "+str(moveList[bestI])+"\n")
+                return moveList[bestI]
+            else:
+                self.output.write("Returning scorelist "+str(scoreList[bestI])+"\n")
+                return scoreList[bestI]
         else:
             scoreTuple=self.score(board)
+            self.output.write("Returning score tuple from lowest level "+str(scoreTuple)+"\n")
             return scoreTuple
             
