@@ -1,13 +1,14 @@
 from ultimateBoard import UltimateBoard
 from board import Board
 from minimaxagent import MinimaxAgent
+from alphabeta import AlphaBetaAgent
 
 class Runner:
     'Runner for Tic Tac Toe game'
     
     def __init__(self):
         self.board=UltimateBoard()
-        self.agent=MinimaxAgent(.5, .5, 'y', 'x', 2)
+        self.agent=AlphaBetaAgent(1, 1, 'y', 'x', 2)
         
     def printBoard(self):
         largeArr=self.board.largeBoard
@@ -48,7 +49,7 @@ class Runner:
         currentBoard=(x, y)
         while self.board.winner=="N":
             if currentPlayer=='y':
-                move=self.agent.analyze(self.board, currentBoard, 1, 'y', 'x')
+                move=self.agent.analyze(self.board, currentBoard, 0, -999999, 999999)
                 loc=move
                 self.board.move(currentPlayer, currentBoard[0], currentBoard[1], loc[0], loc[1])
                 x=loc[0]
@@ -74,7 +75,7 @@ class Runner:
                     y=int(raw_input('Enter y location '))
                 else:
                     #Call the analyze function to pick the best board for y to play in
-                    loc=self.agent.analyze(self.board, currentBoard, 1, 'y', 'x')
+                    loc=self.agent.analyze(self.board, currentBoard, 0, -999999, 999999)
                     x=loc[0]
                     y=loc[1]
             tempPlayer=currentPlayer
