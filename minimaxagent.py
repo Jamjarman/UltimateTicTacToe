@@ -89,7 +89,7 @@ class MinimaxAgent:
         return temp
     
 
-    def analyze(self, board, currBoard, currDepth, player, otherPlayer, alpha, beta):
+    def analyze(self, board, currBoard, currDepth, player, otherPlayer):
         moveList=[]
         scoreList=[]
         if currDepth<self.depth:
