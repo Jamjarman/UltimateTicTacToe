@@ -58,6 +58,11 @@ class AlphaBetaAgent:
         colScoreO=0
         rowAbs=0
         colAbs=0
+        diaPoints=0
+        lrDiagonalAbs=0
+        rlDiagonalAbs=0
+        lrDiagonalAct=0
+        rlDiagonalAct=0
         for i in xrange(3):
             for j in xrange(3):
                 if numArr[i][j]>0:
@@ -72,19 +77,42 @@ class AlphaBetaAgent:
                 colAbs+=abs(numArr[j][i])
                 rowScore+=numArr[i][j]
                 colScore+=numArr[j][i]
+            if numArr[i][i]>0:
+                diaPoints+=1
+            lrDiagonalAbs+=abs(numArr[i][i])
+            lrDiagonalAct+=numArr[i][i]
+            if i==0:
+                if numArr[0][2]>0:
+                    diaPoints+=1
+                rlDiagonalAbs+=abs(numArr[0][2])
+                rlDiagonalAct+=numArr[0][2]
+            elif i==1:
+                if numArr[1][1]>0:
+                    diaPoints+=1
+                rlDiagonalAbs+=abs(numArr[1][1])
+                rlDiagonalAct+=numArr[1][1]
+            elif i==2: 
+                if numArr[2][0]>0:
+                    diaPoints+=1
+                rlDiagonalAbs+=abs(numArr[2][0])
+                rlDiagonalAct+=numArr[2][0]
             rowpoints+=tempRow/3
-            rowpoints-=tempRowO/3
+            #rowpoints-=tempRowO/3
             colpoints+=tempCol/3
-            colpoints-=tempColO/3
+            #colpoints-=tempColO/3
             if rowAbs==3 and rowScore==-1:
                 defpoints+=1
-            elif rowAbs==3 and rowScore==1:
-                defpoints-=1
+            #elif rowAbs==3 and rowScore==1:
+                #defpoints-=1
             if colAbs==3 and colScore==-1:
                 defpoints+=1
-            elif colAbs==3 and colScore==1:
-                defpoints-=1
-        score=(rowpoints+colpoints)*self.No+defpoints*self.Nd
+            #elif colAbs==3 and colScore==1:
+                #defpoints-=1
+        if rlDiagonalAbs==3 and rlDiagonalAct==-1:
+            defpoints+=1
+        if lrDiagonalAbs==3 and lrDiagonalAct==-1:
+            defpoints+=1
+        score=(rowpoints+colpoints+diaPoints/6)*self.No+defpoints*self.Nd
         return score
                         
                 
