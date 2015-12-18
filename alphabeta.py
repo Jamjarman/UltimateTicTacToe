@@ -9,6 +9,7 @@ class AlphaBetaAgent:
 
     #Initialize agent with offensive and defensive modifiers, depth, and which player it is acting as
     def __init__(self, off, deff, player, opponent, depth):
+        self.out=open('output.txt', 'r+')
         self.No=off
         self.Nd=deff
         self.player=player
@@ -34,7 +35,9 @@ class AlphaBetaAgent:
         score+=self.scoreSquare(board.smallBoard, player, opponent)
         for i in xrange(3):
             for j in xrange(3):
+                self.out.write("Loc: ("+str(i)+", "+str(j)+") \n")
                 score+=self.scoreSquare(board.largeBoard[i][j], player, opponent)
+        self.out.write("Total score: "+str(score)+"\n")
         return score
     
     #Currently implemented to ignore opponent's pieces except for defense calc and to check if opponent has won square
@@ -44,6 +47,7 @@ class AlphaBetaAgent:
         elif board.checkWinner()==opponent:
             return -12
         arr=board.boardM
+        self.out.write("Board: "+str(arr)+"\n")
         numArr=self.makeNum(arr, player)
         rowpoints=0
         colpoints=0
@@ -97,9 +101,13 @@ class AlphaBetaAgent:
                 rlDiagonalAbs+=abs(numArr[2][0])
                 rlDiagonalAct+=numArr[2][0]
             rowpoints+=tempRow/3
+            tempRow=0
             #rowpoints-=tempRowO/3
+            tempRowO=0
             colpoints+=tempCol/3
+            tempCol=0
             #colpoints-=tempColO/3
+            tempColO=0
             if rowAbs==3 and rowScore==-1:
                 defpoints+=1
             #elif rowAbs==3 and rowScore==1:
@@ -108,11 +116,18 @@ class AlphaBetaAgent:
                 defpoints+=1
             #elif colAbs==3 and colScore==1:
                 #defpoints-=1
+            rowAbs=0
+            rowScore=0
+            colAbs=0
+            colScore=0
         if rlDiagonalAbs==3 and rlDiagonalAct==-1:
             defpoints+=1
         if lrDiagonalAbs==3 and lrDiagonalAct==-1:
             defpoints+=1
+        self.out.write("Off Score: "+str(rowpoints+colpoints+diaPoints/6)+"\n")
+        self.out.write("Deff Score: "+str(defpoints)+"\n")
         score=(rowpoints+colpoints+diaPoints/6)*self.No+defpoints*self.Nd
+        self.out.write("Score: "+str(score)+"\n")
         return score
                         
                 
